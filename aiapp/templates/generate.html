@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fashion AI Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Google Font -->
+    <!-- Premium Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #1a1a1a, #050505);
+            color: #fff;
+        }
+
+        /* HEADER */
+        header {
+            padding: 20px 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 40px;
+        }
+
+        .hero h2 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .hero span {
+            color: #f5c26b;
+        }
+
+        .hero p {
+            opacity: 0.7;
+        }
+
+        /* CARD */
+        .card {
+            max-width: 900px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+        }
+        .billing-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.05);
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 14px;
+}
+
+
+        /* UPLOAD */
+        /* .upload-box {
+    border: 2px dashed rgba(255,255,255,0.15);
+    padding: 60px 20px;
+    border-radius: 14px;
+    text-align: center;
+    margin-bottom: 40px;
+    cursor: pointer;
+    transition: 0.3s;
+} */
+        /* .upload-box {
+    position: relative;
+    border: 2px dashed rgba(255,255,255,0.15);
+    padding: 60px 20px;
+    border-radius: 14px;
+    text-align: center;
+    margin-bottom: 40px;
+    cursor: pointer;
+    transition: 0.3s;
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+        .upload-box1,
+.upload-box2 {
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    padding: 40px 30px;
+    border-radius: 16px;
+    text-align: center;
+    transition: 0.3s;
+    min-height: 240px;
+    width: 100%;
+    max-width: 250px;
+    background: rgba(255,255,255,0.02);
+}
+
+        .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .upload-icon {
+            font-size: 42px;
+            color: #f5c26b;
+        }
+
+        .add-btn {
+            margin-top: 10px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            background: #f5c26b;
+            color: black;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #111;
+            padding: 10px;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .remove-btn:hover {
+            background: red;
+        }
+
+
+        .upload-box img {
+            max-height: 240px;
+            max-width: 100%;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+
+        .upload-box:hover {
+            border-color: #f5c26b;
+            background: rgba(245, 194, 107, 0.05);
+        }
+
+        .upload-box input {
+            display: none;
+        }
+
+        /* FORM ROW */
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* SELECT */
+        select {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: #111;
+            color: white;
+            font-size: 16px;
+        }
+
+        /* BUTTON */
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #f5c26b, #d49b39);
+            color: black;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(245, 194, 107, 0.3);
+        }
+
+        /* STATUS */
+        .status {
+            text-align: center;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+        .uploadbox-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        /* GALLERY */
+        .gallery {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* MOBILE */
+        @media(max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h2 {
+                font-size: 34px;
+            }
+
+            .card {
+                padding: 30px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+        <h1>✨ Fashion AI Studio</h1>
+        <div class="billing-box">
+        <span>💳 Gemini Usage</span>
+    </div>
+        <strong id="usageCost">$0.00</strong>
+    </div>
+        <div>Pro Features</div>
+    </header>
+
+    <section class="hero">
+        <h2>Create Your <span>Fashion Shoot</span></h2>
+        <p>Upload a garment image and let AI generate professional fashion photography in seconds</p>
+    </section>
+
+    <div class="card">
+
+        <form id="uploadForm">
+            <div class="uploadbox-container">
+                 <div class="upload-box1" id="uploadBox">
+
+                <input type="file" id="designs" multiple hidden>
+
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <div class="upload-icon">⬆</div>
+                    <h3>Drop your garments here</h3>
+                    <p>or click to browse • PNG, JPG up to 10MB</p>
+                    <button id="addBtn" class="add-btn" type="button">+ Add Designs</button>
+                </div>
+                <!-- PATTERN UPLOAD -->
+                
+
+
+
+                <div class="preview-grid" id="previewGrid"></div>
+
+            </div>
+            <div class="upload-box2" id="patternUploadBox">
+
+                    <input type="file" id="patternInput" hidden>
+
+                    <div class="upload-placeholder" id="patternPlaceholder">
+                        <div class="upload-icon">🎨</div>
+                        <h3>Upload Pattern / Texture (Optional)</h3>
+                        <p>PNG, JPG • Fabric, texture, print</p>
+                        <button id="patternAddBtn" class="add-btn" type="button">+ Add Pattern</button>
+                    </div>
+
+                    <div class="preview-grid" id="patternPreviewGrid"></div>
+
+                
+            </div>
+
+            </div>
+
+           
+
+
+            <div class="row">
+                <select id="gender">
+                    <option value="Male">Male Model</option>
+                    <option value="Female">Female Model</option>
+                    <option value="Kid Boy">Kid Boy</option>
+                    <option value="Kid Girl">Kid Girl</option>
+                </select>
+
+                <select id="bodytype">
+                    <option value="Full-Body">Full Body Shoot</option>
+                    <option value="Upper-Body">Upper Body Shoot</option>
+                    <option value="Lower-Body">Lower Body Shoot</option>
+                </select>
+            </div>
+
+            <button type="submit">✨ Generate Fashion Shoot</button>
+            
+
+        </form>
+
+        <div class="status" id="status"></div>
+        <div class="gallery" id="gallery"></div>
+        <div style="text-align:center; margin-top:30px;">
+    <button id="downloadAllBtn" style="display:none;">⬇ Download All Images</button>
+</div>
+
+    </div>
+
+
+
+    <script>
+        const fileInput = document.getElementById("designs");
+        const previewGrid = document.getElementById("previewGrid");
+        const uploadPlaceholder = document.getElementById("uploadPlaceholder");
+        const addBtn = document.getElementById("addBtn");
+        let uploadedFiles = [];
+        const downloadAllBtn = document.getElementById("downloadAllBtn");
+        downloadAllBtn.addEventListener("click", function () {
+        window.location.href = "/api/download-photos/";
+    });
+
+        // ─── SINGLE function to open file picker ───────────────────────────
+        function openFilePicker() {
+            fileInput.click();
+        }
+
+        // 1. Add button always opens picker
+        addBtn.addEventListener("click", function (e) {
+            e.stopPropagation(); // prevent bubbling to parent
+            openFilePicker();
+        });
+
+        // 2. Click anywhere on upload area (except buttons/images inside previews)
+        const uploadArea = document.querySelector(".upload-area") ||
+            uploadPlaceholder?.parentElement ||
+            document.querySelector(".upload-box") ||
+            previewGrid.parentElement;
+
+        if (uploadArea) {
+            uploadArea.addEventListener("click", function (e) {
+                // IMPORTANT: Ignore clicks on these elements
+                if (e.target.closest(".remove-btn")) return;
+                if (e.target.tagName === "IMG") return;
+                if (e.target === addBtn) return;           // already handled above
+                if (e.target.closest("#addBtn")) return;
+
+                openFilePicker();
+            });
+        }
+
+        // ─── When files are selected ───────────────────────────────────────
+        fileInput.addEventListener("change", function (e) {
+            const newFiles = Array.from(this.files);
+
+            if (newFiles.length > 0) {
+                uploadedFiles = [...uploadedFiles, ...newFiles];
+                renderPreviews();
+            }
+
+            this.value = ""; // Critical: reset so same file can be selected again
+        });
+
+        // ─── Render previews ───────────────────────────────────────────────
+        function renderPreviews() {
+            previewGrid.innerHTML = "";
+            uploadPlaceholder.style.display = uploadedFiles.length ? "none" : "flex";
+
+            uploadedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const div = document.createElement("div");
+                    div.className = "preview-item";
+                    div.innerHTML = `
+                <img src="${e.target.result}" alt="preview">
+                <button class="remove-btn" type="button" data-index="${index}">×</button>
+            `;
+                    previewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ─── Remove image (using event delegation - more reliable) ─────────
+        previewGrid.addEventListener("click", function (e) {
+            const btn = e.target.closest(".remove-btn");
+            if (!btn) return;
+
+            const index = parseInt(btn.dataset.index);
+            if (isNaN(index)) return;
+
+            uploadedFiles.splice(index, 1);
+            renderPreviews();
+        });
+        
+
+        // ─── Form submit ─────────────────────────────────────────────────
+        uploadForm.addEventListener("submit", async function (e) {
+            console.log("Submitting form...");
+            e.preventDefault();
+            let status = document.getElementById("status");
+            downloadAllBtn.style.display = "none";
+
+            status.innerHTML = "🎬 Generating fashion shoot...";
+            gallery.innerHTML = "";
+
+            const formData = new FormData();
+
+            uploadedFiles.forEach(file => {
+                formData.append("designs", file);
+            });
+              patternFiles.forEach(file => {
+                    formData.append("pattern", file);   // Django will receive request.FILES.getlist("pattern")
+                });
+
+            formData.append("gender", document.getElementById("gender").value);
+            formData.append("bodytype", document.getElementById("bodytype").value);
+
+            try {
+                const response = await fetch("/api/generate/", {
+                    method: "POST",
+                    body: formData
+                });
+
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    status.innerHTML = `✅ Generated ${data.count} images`;
+                    const usageCost = document.getElementById("usageCost");
+                    console.log("Total Cost:", data.total_cost);
+                    downloadAllBtn.style.display = "inline-block";
+
+                    if (data.total_cost !== undefined) {
+                        usageCost.innerHTML = `$${data.total_cost.toFixed(2)}`;
+                    }
+
+
+                    data.results.forEach(item => {
+                        const img = document.createElement("img");
+                        img.src = item.url;
+                        img.alt = "Generated fashion image";
+                        gallery.appendChild(img);
+                    });
+                } else {
+                    status.innerHTML = "❌ Error: " + (data.error || "Unknown error");
+                }
+            } catch (err) {
+                status.innerHTML = "❌ Network error: " + err.message;
+            }
+        });
+    </script>
+    <script>
+/* ============================
+   PATTERN UPLOAD LOGIC
+============================ */
+
+const patternInput = document.getElementById("patternInput");
+const patternPreviewGrid = document.getElementById("patternPreviewGrid");
+const patternPlaceholder = document.getElementById("patternPlaceholder");
+const patternAddBtn = document.getElementById("patternAddBtn");
+
+let patternFiles = [];
+
+/* Open file picker */
+patternAddBtn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    patternInput.click();
+});
+
+patternPlaceholder.addEventListener("click", function() {
+    patternInput.click();
+});
+
+/* Handle file selection */
+patternInput.addEventListener("change", function() {
+    const newFiles = Array.from(this.files);
+
+    if (newFiles.length > 0) {
+        patternFiles = [...patternFiles, ...newFiles];
+        renderPatternPreviews();
+    }
+
+    // reset so same file can be selected again
+    this.value = "";
+});
+
+/* Render previews */
+function renderPatternPreviews() {
+    patternPreviewGrid.innerHTML = "";
+    patternPlaceholder.style.display = patternFiles.length ? "none" : "flex";
+
+    patternFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement("div");
+            div.className = "preview-item";
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="pattern">
+                <button class="remove-btn" type="button" data-index="${index}">×</button>
+            `;
+            patternPreviewGrid.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+/* Remove pattern */
+patternPreviewGrid.addEventListener("click", function(e) {
+    const btn = e.target.closest(".remove-btn");
+    if (!btn) return;
+
+    const index = parseInt(btn.dataset.index);
+    if (isNaN(index)) return;
+
+    patternFiles.splice(index, 1);
+    renderPatternPreviews();
+});
+
+function renderPreviews() {
+    previewGrid.innerHTML = "";
+    uploadPlaceholder.style.display = uploadedFiles.length ? "none" : "flex";
+
+    // 🔹 If more than 2 images → show ONLY count
+    if (uploadedFiles.length > 2) {
+        const countBox = document.createElement("div");
+
+        countBox.style.background = "#111";
+        countBox.style.padding = "20px";
+        countBox.style.borderRadius = "14px";
+        countBox.style.border = "1px dashed rgba(255,255,255,0.2)";
+        countBox.style.textAlign = "center";
+        countBox.style.fontSize = "18px";
+        countBox.style.fontWeight = "600";
+
+        countBox.innerHTML = `📦 ${uploadedFiles.length} Images Selected`;
+
+        previewGrid.appendChild(countBox);
+        return;
+    }
+
+    // 🔹 Otherwise show image previews (1 or 2 images)
+    uploadedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement("div");
+            div.className = "preview-item";
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="preview">
+                <button class="remove-btn" type="button" data-index="${index}">×</button>
+            `;
+            previewGrid.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+</script>
+
+</body>
+
+</html>
