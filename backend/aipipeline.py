@@ -152,16 +152,16 @@ def runbatch_pipeline(uploaded_files, gender, bodytype, pattern_file=None, color
     views = ["front", "back", "left side", "closeup"] if generate_all_views else ["front"]
     valid_files = []
 
-    for file in uploaded_files:
-        try:
-            img = Image.open(file)
-            img.verify()   # verify image integrity
-            file.seek(0)   # reset pointer after verify
-            valid_files.append(file)
-        except Exception as e:
-            print("Skipping invalid image:", file.name, e)
+    # for file in uploaded_files:
+    #     try:
+    #         img = Image.open(file)
+    #         img.verify()   # verify image integrity
+    #         file.seek(0)   # reset pointer after verify
+    #         valid_files.append(file)
+    #     except Exception as e:
+    #         print("Skipping invalid image:", file.name, e)
 
-    uploaded_files = valid_files
+    # uploaded_files = valid_files
 
     def safe_generate(file, view):
         for attempt in range(MAX_RETRIES):
