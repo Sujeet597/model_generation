@@ -78,7 +78,8 @@ WSGI_APPLICATION = 'fashion_ai.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': '/home/site/db.sqlite3',
+        'OPTIONS': {"timeout": 20},
     }
 }
 MEDIA_URL = '/media/'
