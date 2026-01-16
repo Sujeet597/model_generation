@@ -150,44 +150,32 @@ MAX_RETRIES = 2
 def runbatch_pipeline(uploaded_files, gender, bodytype, pattern_file=None, color_name=None, generate_all_views=True):
     all_results = []
     views = ["front", "back", "left side", "closeup"] if generate_all_views else ["front"]
-    valid_files = []
 
-    # for file in uploaded_files:
-    #     try:
-    #         img = Image.open(file)
-    #         img.verify()   # verify image integrity
-    #         file.seek(0)   # reset pointer after verify
-    #         valid_files.append(file)
-    #     except Exception as e:
-    #         print("Skipping invalid image:", file.name, e)
-
-    # uploaded_files = valid_files
-
-    def safe_generate(file, view):
-        for attempt in range(MAX_RETRIES):
+    for f in uploaded_files:
+        for view in views:
             try:
-                return run_singlegeneration(file, gender, bodytype, pattern_file, color_name, view)
-            except Exception as e:
-                if attempt == MAX_RETRIES - 1:
-                    raise e
-                time.sleep(1)
+                print(f"Generating {f.name} - {view}")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = []
+                # Gemini-safe delay
+                time.sleep(3)
 
-        for f in uploaded_files:
-            for view in views:
-                futures.append(executor.submit(safe_generate, f, view))
-
-        for future, (f, view) in zip(futures, [(f, v) for f in uploaded_files for v in views]):
-            try:
-                img_obj = future.result(timeout=120)
+                img_obj = run_singlegeneration(
+                    f,
+                    gender,
+                    bodytype,
+                    pattern_file,
+                    color_name,
+                    view
+                )
 
                 all_results.append({
                     "file_name": f.name,
                     "view": view,
                     "output": img_obj
                 })
+
+                # 🔥 Free memory immediately
+                del img_obj
 
             except Exception as e:
                 all_results.append({
