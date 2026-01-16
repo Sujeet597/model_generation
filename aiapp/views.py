@@ -75,25 +75,25 @@ class FashionGenerateAPI(APIView):
                 "view": item["view"],
                 "url": default_storage.url(saved_path)
             })
-        counter, created = GeminiGenerationStats.objects.get_or_create(id=1)
+        # counter, created = GeminiGenerationStats.objects.get_or_create(id=1)
 
-        new_images = len(output_urls)
+        # new_images = len(output_urls)
 
-        # Add to total images
-        counter.total_images += new_images
-        COST_PER_IMAGE = 0.04
+        # # Add to total images
+        # counter.total_images += new_images
+        # COST_PER_IMAGE = 0.04
 
-        # Calculate cost
-        counter.total_cost = counter.total_images * COST_PER_IMAGE
+        # # Calculate cost
+        # counter.total_cost = counter.total_images * COST_PER_IMAGE
 
-        counter.save()
+        # counter.save()
 
         return Response({
             "status": "success",
             "count": len(output_urls),
             "results": output_urls,
-            "cost_per_image": COST_PER_IMAGE,
-            "total_cost": float(counter.total_cost),
+            # "cost_per_image": COST_PER_IMAGE,
+            # "total_cost": float(counter.total_cost),
         })
     
 
