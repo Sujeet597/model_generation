@@ -18,7 +18,7 @@ load_dotenv()
 # Initialize the 2025 Client
 client = genai.Client(api_key=os.getenv("GEMINIAPI_KEY"))
 
-def run_singlegeneration(shirtfile, gender, bodytype, patternfile=None, color_name=None, view_direction="front"):
+def run_singlegeneration(shirtfile, gender, bodytype, model, patternfile=None, color_name=None, view_direction="front"):
     try:
         img = Image.open(shirtfile)
         img.load()
@@ -40,6 +40,7 @@ def run_singlegeneration(shirtfile, gender, bodytype, patternfile=None, color_na
                 'texture overlay',
                 gender,
                 bodytype,
+                model,
                 color_name=color_name,
                 view_direction=view_direction
             )
@@ -58,6 +59,7 @@ def run_singlegeneration(shirtfile, gender, bodytype, patternfile=None, color_na
                 'virtual try on',
                 gender,
                 bodytype,
+                model,
                 color_name=color_name,
                 view_direction=view_direction
             )
@@ -147,35 +149,47 @@ MAX_WORKERS = min(8, os.cpu_count() or 4)
 MAX_RETRIES = 2
 
 
-def runbatch_pipeline(uploaded_files, gender, bodytype, pattern_file=None, color_name=None, generate_all_views=True):
+def runbatch_pipeline(uploaded_files, gender, bodytype, model,  pattern_file=None, color_name=None, generate_all_views=True):
     all_results = []
     views = ["front", "back", "left side", "closeup"] if generate_all_views else ["front"]
+    valid_files = []
 
-    for f in uploaded_files:
-        for view in views:
+    # for file in uploaded_files:
+    #     try:
+    #         img = Image.open(file)
+    #         img.verify()   # verify image integrity
+    #         file.seek(0)   # reset pointer after verify
+    #         valid_files.append(file)
+    #     except Exception as e:
+    #         print("Skipping invalid image:", file.name, e)
+
+    # uploaded_files = valid_files
+
+    def safe_generate(file, view):
+        for attempt in range(MAX_RETRIES):
             try:
-                print(f"Generating {f.name} - {view}")
+                return run_singlegeneration(file, gender, bodytype,model,  pattern_file, color_name, view)
+            except Exception as e:
+                if attempt == MAX_RETRIES - 1:
+                    raise e
+                time.sleep(1)
 
-                # Gemini-safe delay
-                time.sleep(3)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = []
 
-                img_obj = run_singlegeneration(
-                    f,
-                    gender,
-                    bodytype,
-                    pattern_file,
-                    color_name,
-                    view
-                )
+        for f in uploaded_files:
+            for view in views:
+                futures.append(executor.submit(safe_generate, f, view))
+
+        for future, (f, view) in zip(futures, [(f, v) for f in uploaded_files for v in views]):
+            try:
+                img_obj = future.result(timeout=120)
 
                 all_results.append({
                     "file_name": f.name,
                     "view": view,
                     "output": img_obj
                 })
-
-                # 🔥 Free memory immediately
-                del img_obj
 
             except Exception as e:
                 all_results.append({

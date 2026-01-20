@@ -1,4 +1,4 @@
-def buildprompt(condition, gender, bodytype, pattern_name='none', color_name=None, view_direction="front"):
+def buildprompt(condition, gender, bodytype, model, pattern_name='none', color_name=None, view_direction="front"):
     
     # MODEL DESCRIPTION
     match gender.lower() if gender else "":
@@ -44,26 +44,33 @@ def buildprompt(condition, gender, bodytype, pattern_name='none', color_name=Non
 
     # AUTO BACKGROUND SELECTION (AI decides based on garment)
     background_instr = """
-    FIRST analyze the SOURCE_IMAGE carefully.
+        FIRST analyze the SOURCE_IMAGE carefully.
 
-    Identify:
-    - Garment type (shirt, t-shirt, kurta, jacket, dress, kidswear, etc)
-    - Season (summer, winter, festive, casual, formal)
-    - Style (casual, party, ethnic, street, resort, winterwear)
+        Identify:
+        - Garment type (shirt, t-shirt, kurta, jacket, dress, kidswear, etc)
+        - Garment fit and silhouette
+        - Fabric texture and primary colors
 
-    Then automatically choose the BEST outdoor fashion photoshoot environment:
+        Then generate the final image in a professional photo studio setup.
 
-    Rules:
-    - Summer / resort wear → beach party, poolside, tropical vacation
-    - Winter wear / jackets → snowy mountain station, winter street
-    - Casual / streetwear → urban street, city road, graffiti wall
-    - Ethnic / festive → palace, heritage fort, royal courtyard
-    - Kidswear → park, playground, outdoor fun zone
+        Background Rules:
+        - Use a simple solid color studio background
+        - Choose a neutral tone that complements the garment (white, off-white, light grey, beige, pastel)
+        - No outdoor environment
+        - No props, no scenery
+        - No textures or patterns
 
-    Pick ONLY ONE most suitable environment.
-    Use natural outdoor lighting and lifestyle fashion photography look.
-    The background must enhance the garment style and season.
-    """
+        Lighting & Style:
+        - Soft studio lighting
+        - Clean even illumination
+        - Subtle natural shadows
+        - Professional fashion catalog photography look
+        - Sharp focus on garment and fabric details
+
+        Pick ONLY ONE best solid color background.
+        The background must enhance the garment and keep the look minimal and premium.
+        """
+
 
     # FINAL PROMPT
     prompt = f"""
@@ -76,9 +83,13 @@ def buildprompt(condition, gender, bodytype, pattern_name='none', color_name=Non
     4. Generate a hyper-realistic fashion model photoshoot.
 
     Model:
+    - model-type{model}
     - {model_desc}
     - Confident neutral expression
     - Professional fashion pose
+
+    Size:
+    -(2000x3000)px
 
     Framing:
     - {framing_desc}

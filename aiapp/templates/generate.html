@@ -35,6 +35,7 @@
 
         /* HERO */
         .hero {
+            font-family: 'Playfair Display', serif;
             text-align: center;
             padding: 80px 20px 40px;
         }
@@ -63,15 +64,15 @@
             backdrop-filter: blur(15px);
         }
         .billing-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.05);
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-    font-size: 14px;
-}
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+        }
 
 
         /* UPLOAD */
@@ -100,6 +101,7 @@
 } */
         .upload-box1,
 .upload-box2 {
+    font-family: 'Playfair Display', serif;
     border: 2px dashed rgba(255, 255, 255, 0.15);
     padding: 40px 30px;
     border-radius: 16px;
@@ -197,6 +199,11 @@
             gap: 25px;
             margin-bottom: 40px;
         }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom:10px;
+        }
+        
 
         /* SELECT */
         select {
@@ -284,7 +291,7 @@
     </div>
         <strong id="usageCost">$0.00</strong>
     </div>
-        <div>Pro Features</div>
+        <div><a href="/api/history/" style="color:#f5c26b;text-decoration:none;">← History</a></div>
     </header>
 
     <section class="hero">
@@ -342,7 +349,10 @@
                     <option value="Kid Boy">Kid Boy</option>
                     <option value="Kid Girl">Kid Girl</option>
                 </select>
-
+                <select id="model">
+                    <option value="indian">Indian</option>
+                    <option value="foreigner">Foreigner</option>
+                </select>
                 <select id="bodytype">
                     <option value="Full-Body">Full Body Shoot</option>
                     <option value="Upper-Body">Upper Body Shoot</option>
@@ -371,10 +381,19 @@
         const uploadPlaceholder = document.getElementById("uploadPlaceholder");
         const addBtn = document.getElementById("addBtn");
         let uploadedFiles = [];
-        const downloadAllBtn = document.getElementById("downloadAllBtn");
+        // const downloadAllBtn = document.getElementById("downloadAllBtn");
+       // downloadAllBtn.addEventListener("click", function () {
+       // window.location.href = "/api/download-photos/";
+    //});
         downloadAllBtn.addEventListener("click", function () {
-        window.location.href = "/api/download-photos/";
-    });
+        if (!currentDateFolder || !currentHitFolder) {
+            alert("No generation found to download.");
+            return;
+        }
+
+    window.location.href = `/api/download-photos/?date=${currentDateFolder}&hit=${currentHitFolder}`;
+});
+
 
         // ─── SINGLE function to open file picker ───────────────────────────
         function openFilePicker() {
@@ -471,6 +490,7 @@
 
             formData.append("gender", document.getElementById("gender").value);
             formData.append("bodytype", document.getElementById("bodytype").value);
+            formData.append("model", document.getElementById("model").value);
 
             try {
                 const response = await fetch("/api/generate/", {
@@ -484,6 +504,8 @@
                 if (data.status === "success") {
                     status.innerHTML = `✅ Generated ${data.count} images`;
                     const usageCost = document.getElementById("usageCost");
+                     currentDateFolder = data.date_folder;
+                     currentHitFolder = data.hit_folder;
                     console.log("Total Cost:", data.total_cost);
                     downloadAllBtn.style.display = "inline-block";
 
