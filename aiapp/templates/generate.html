@@ -358,6 +358,10 @@
                     <option value="Upper-Body">Upper Body Shoot</option>
                     <option value="Lower-Body">Lower Body Shoot</option>
                 </select>
+                <select id="imagesCount">
+                    <option value="1">1</option>
+                    <option value="4">4</option>
+                </select>
             </div>
 
             <button type="submit">✨ Generate Fashion Shoot</button>
@@ -491,6 +495,7 @@
             formData.append("gender", document.getElementById("gender").value);
             formData.append("bodytype", document.getElementById("bodytype").value);
             formData.append("model", document.getElementById("model").value);
+            formData.append("imagesCount", document.getElementById("imagesCount").value);
 
             try {
                 const response = await fetch("/api/generate/", {

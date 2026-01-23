@@ -18,7 +18,7 @@ load_dotenv()
 # Initialize the 2025 Client
 client = genai.Client(api_key=os.getenv("GEMINIAPI_KEY"))
 
-def run_singlegeneration(shirtfile, gender, bodytype, model, patternfile=None, color_name=None, view_direction="front"):
+def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patternfile=None, color_name=None, view_direction="front"):
     try:
         img = Image.open(shirtfile)
         img.load()
@@ -41,6 +41,7 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, patternfile=None, c
                 gender,
                 bodytype,
                 model,
+                image_count,
                 color_name=color_name,
                 view_direction=view_direction
             )
@@ -60,6 +61,7 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, patternfile=None, c
                 gender,
                 bodytype,
                 model,
+                image_count,
                 color_name=color_name,
                 view_direction=view_direction
             )
@@ -73,7 +75,7 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, patternfile=None, c
 
         # Use the 2.5 Flash Image model
         response = client.models.generate_content(
-            model='gemini-3-pro-image-preview',
+            model='gemini-2.5-flash-image',
             contents=contents,
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE"],
@@ -149,9 +151,12 @@ MAX_WORKERS = min(8, os.cpu_count() or 4)
 MAX_RETRIES = 2
 
 
-def runbatch_pipeline(uploaded_files, gender, bodytype, model,  pattern_file=None, color_name=None, generate_all_views=True):
+def runbatch_pipeline(uploaded_files, gender, bodytype, model, image_count, pattern_file=None, color_name=None, generate_all_views=True):
     all_results = []
-    views = ["front", "back", "left side", "closeup"] if generate_all_views else ["front"]
+    if image_count == "1":
+        views = ["front"]
+    else:
+        views = ["front", "back", "left side", "closeup"] if generate_all_views else ["front"]
     valid_files = []
 
     # for file in uploaded_files:
@@ -168,7 +173,7 @@ def runbatch_pipeline(uploaded_files, gender, bodytype, model,  pattern_file=Non
     def safe_generate(file, view):
         for attempt in range(MAX_RETRIES):
             try:
-                return run_singlegeneration(file, gender, bodytype,model,  pattern_file, color_name, view)
+                return run_singlegeneration(file, gender, bodytype,model,image_count, pattern_file, color_name, view)
             except Exception as e:
                 if attempt == MAX_RETRIES - 1:
                     raise e

@@ -1,6 +1,7 @@
-def buildprompt(condition, gender, bodytype, model, pattern_name='none', color_name=None, view_direction="front"):
+def buildprompt(condition, gender, bodytype, model, image_count, pattern_name='none', color_name=None, view_direction="front"):
     
     # MODEL DESCRIPTION
+    print(image_count)
     match gender.lower() if gender else "":
         case 'male':          
             model_desc = "a professional male fashion model"
@@ -34,12 +35,19 @@ def buildprompt(condition, gender, bodytype, model, pattern_name='none', color_n
         )
 
     # VIEW DIRECTION
-    view_map = {
-        "front": "Front-facing model pose showing the front of the garment clearly.",
-        "back": "Back-facing model pose showing the back of the garment clearly.",
-        "left side": "Left side profile model pose showing the side fit of the garment.",
-        "closeup": "Close-up fashion shot highlighting fabric texture, stitching and details."
-    }
+    if image_count == "1":
+        view_map = {
+            "front": "Front-facing model pose showing the front of the garment clearly."
+        }
+        print("Single image requested, using front view only.")
+    else:
+        view_map = {
+            "front": "Front-facing model pose showing the front of the garment clearly.",
+            "back": "Back-facing model pose showing the back of the garment clearly.",
+            "left side": "Left side profile model pose showing the side fit of the garment.",
+            "closeup": "Close-up fashion shot highlighting fabric texture, stitching and details."
+        }
+        print("Multiple images requested, using all views.")
     view_instr = view_map.get(view_direction.lower(), "Front-facing fashion model pose.")
 
     # AUTO BACKGROUND SELECTION (AI decides based on garment)
