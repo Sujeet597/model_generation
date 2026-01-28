@@ -19,8 +19,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from fashion_ai.views import login_view, login_view_redirect, register_view
+from django.contrib.auth.views import LogoutView
+
 
 urlpatterns = [
+    path("", login_view_redirect, name="home"),
+    path("login/", login_view, name='login'),
+    path("register/", register_view, name='register'),
+    path("logout/", LogoutView.as_view(next_page="/login/"), name="logout"),
     path('admin/', admin.site.urls),
     path("api/", include("aiapp.urls"))
 

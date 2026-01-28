@@ -63,16 +63,22 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(15px);
         }
+
         .billing-box {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             padding: 10px 18px;
             border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 14px;
         }
+        .remove-all {
+    top: 8px;
+    right: 8px;
+}
+
 
 
         /* UPLOAD */
@@ -100,18 +106,18 @@
     justify-content: center;
 } */
         .upload-box1,
-.upload-box2 {
-    font-family: 'Playfair Display', serif;
-    border: 2px dashed rgba(255, 255, 255, 0.15);
-    padding: 40px 30px;
-    border-radius: 16px;
-    text-align: center;
-    transition: 0.3s;
-    min-height: 240px;
-    width: 100%;
-    max-width: 250px;
-    background: rgba(255,255,255,0.02);
-}
+        .upload-box2 {
+            font-family: 'Playfair Display', serif;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            padding: 40px 30px;
+            border-radius: 16px;
+            text-align: center;
+            transition: 0.3s;
+            min-height: 240px;
+            width: 100%;
+            max-width: 250px;
+            background: rgba(255, 255, 255, 0.02);
+        }
 
         .upload-placeholder {
             display: flex;
@@ -199,11 +205,12 @@
             gap: 25px;
             margin-bottom: 40px;
         }
+
         h1 {
             font-family: 'Playfair Display', serif;
-            margin-bottom:10px;
+            margin-bottom: 10px;
         }
-        
+
 
         /* SELECT */
         select {
@@ -241,6 +248,7 @@
             margin-top: 30px;
             opacity: 0.8;
         }
+
         .uploadbox-container {
             display: flex;
             justify-content: center;
@@ -263,6 +271,70 @@
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
+        /* Toast Container */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Toast */
+.toast {
+    min-width: 260px;
+    max-width: 340px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    animation: slideIn 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.45);
+}
+
+/* Success */
+.toast.success {
+    background: rgba(46, 204, 113, 0.18);
+    border: 1px solid rgba(46, 204, 113, 0.45);
+    color: #a8f0c6;
+}
+
+/* Error */
+.toast.error {
+    background: rgba(231, 76, 60, 0.18);
+    border: 1px solid rgba(231, 76, 60, 0.45);
+    color: #ffb3b3;
+}
+
+/* Warning */
+.toast.warning {
+    background: rgba(241, 196, 15, 0.18);
+    border: 1px solid rgba(241, 196, 15, 0.45);
+    color: #ffeaa7;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
 
         /* MOBILE */
         @media(max-width: 768px) {
@@ -283,45 +355,82 @@
 </head>
 
 <body>
+    {% if messages %}
+        <div id="toast-container">
+            {% for message in messages %}
+                <div class="toast {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
     <header>
         <h1>✨ Fashion AI Studio</h1>
         <div class="billing-box">
-        <span>💳 Gemini Usage</span>
-    </div>
+            <span>💳 Gemini Usage</span>
+        </div>
         <strong id="usageCost">$0.00</strong>
-    </div>
-        <div><a href="/api/history/" style="color:#f5c26b;text-decoration:none;">← History</a></div>
+        </div>
+        {% if request.user.is_superuser %}
+            <div>
+                <a href="/api/history/"
+                style="color:#f5c26b;text-decoration:none;">
+                ← History
+                </a>
+            </div>
+            <div>
+                <a href="/register/"
+                style="color:#f5c26b;text-decoration:none;">
+                create new user
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- <div><a href="/api/history/" style="color:#f5c26b;text-decoration:none;">← History</a></div> -->
+        <div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button style="background-color:#f5c26b; color: #1a1a1a;" type="submit">Logout</button>
+            </form>
+        </div>
     </header>
 
     <section class="hero">
+        <p style="margin-bottom:10px; font-size:14px;">
+    Welcome,  {% if request.user.is_superuser %}<strong>Admin</strong>{% endif %}   <strong>
+        {{ request.user.username }} 
+    </strong>
+       </p>
         <h2>Create Your <span>Fashion Shoot</span></h2>
         <p>Upload a garment image and let AI generate professional fashion photography in seconds</p>
     </section>
 
     <div class="card">
+        
+
 
         <form id="uploadForm">
             <div class="uploadbox-container">
-                 <div class="upload-box1" id="uploadBox">
+                <div class="upload-box1" id="uploadBox">
 
-                <input type="file" id="designs" multiple hidden>
+                    <input type="file" id="designs" multiple hidden>
 
-                <div class="upload-placeholder" id="uploadPlaceholder">
-                    <div class="upload-icon">⬆</div>
-                    <h3>Drop your garments here</h3>
-                    <p>or click to browse • PNG, JPG up to 10MB</p>
-                    <button id="addBtn" class="add-btn" type="button">+ Add Designs</button>
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <div class="upload-icon">⬆</div>
+                        <h3>Drop your garments here</h3>
+                        <p>or click to browse • PNG, JPG up to 10MB</p>
+                        <button id="addBtn" class="add-btn" type="button">+ Add Designs</button>
+                    </div>
+                    <!-- PATTERN UPLOAD -->
+
+
+
+
+                    <div class="preview-grid" id="previewGrid"></div>
+
                 </div>
-                <!-- PATTERN UPLOAD -->
-                
-
-
-
-                <div class="preview-grid" id="previewGrid"></div>
-
-            </div>
-            <div class="upload-box2" id="patternUploadBox">
+                <div class="upload-box2" id="patternUploadBox">
 
                     <input type="file" id="patternInput" hidden>
 
@@ -334,12 +443,12 @@
 
                     <div class="preview-grid" id="patternPreviewGrid"></div>
 
-                
-            </div>
+
+                </div>
 
             </div>
 
-           
+
 
 
             <div class="row">
@@ -365,38 +474,52 @@
             </div>
 
             <button type="submit">✨ Generate Fashion Shoot</button>
-            
+
 
         </form>
 
         <div class="status" id="status"></div>
         <div class="gallery" id="gallery"></div>
         <div style="text-align:center; margin-top:30px;">
-    <button id="downloadAllBtn" style="display:none;">⬇ Download All Images</button>
-</div>
+            <button id="downloadAllBtn" style="display:none;">⬇ Download All Images</button>
+        </div>
 
     </div>
 
 
 
     <script>
+        function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
         const fileInput = document.getElementById("designs");
         const previewGrid = document.getElementById("previewGrid");
         const uploadPlaceholder = document.getElementById("uploadPlaceholder");
         const addBtn = document.getElementById("addBtn");
         let uploadedFiles = [];
         // const downloadAllBtn = document.getElementById("downloadAllBtn");
-       // downloadAllBtn.addEventListener("click", function () {
-       // window.location.href = "/api/download-photos/";
-    //});
+        // downloadAllBtn.addEventListener("click", function () {
+        // window.location.href = "/api/download-photos/";
+        //});
         downloadAllBtn.addEventListener("click", function () {
-        if (!currentDateFolder || !currentHitFolder) {
-            alert("No generation found to download.");
-            return;
-        }
+            if (!currentDateFolder || !currentHitFolder) {
+                alert("No generation found to download.");
+                return;
+            }
 
-    window.location.href = `/api/download-photos/?date=${currentDateFolder}&hit=${currentHitFolder}`;
-});
+            window.location.href = `/api/download-photos/?date=${currentDateFolder}&hit=${currentHitFolder}`;
+        });
 
 
         // ─── SINGLE function to open file picker ───────────────────────────
@@ -471,7 +594,7 @@
             uploadedFiles.splice(index, 1);
             renderPreviews();
         });
-        
+
 
         // ─── Form submit ─────────────────────────────────────────────────
         uploadForm.addEventListener("submit", async function (e) {
@@ -488,9 +611,9 @@
             uploadedFiles.forEach(file => {
                 formData.append("designs", file);
             });
-              patternFiles.forEach(file => {
-                    formData.append("pattern", file);   // Django will receive request.FILES.getlist("pattern")
-                });
+            patternFiles.forEach(file => {
+                formData.append("pattern", file);   // Django will receive request.FILES.getlist("pattern")
+            });
 
             formData.append("gender", document.getElementById("gender").value);
             formData.append("bodytype", document.getElementById("bodytype").value);
@@ -500,6 +623,9 @@
             try {
                 const response = await fetch("/api/generate/", {
                     method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
                     body: formData
                 });
 
@@ -509,8 +635,8 @@
                 if (data.status === "success") {
                     status.innerHTML = `✅ Generated ${data.count} images`;
                     const usageCost = document.getElementById("usageCost");
-                     currentDateFolder = data.date_folder;
-                     currentHitFolder = data.hit_folder;
+                    currentDateFolder = data.date_folder;
+                    currentHitFolder = data.hit_folder;
                     console.log("Total Cost:", data.total_cost);
                     downloadAllBtn.style.display = "inline-block";
 
@@ -534,111 +660,123 @@
         });
     </script>
     <script>
-/* ============================
-   PATTERN UPLOAD LOGIC
-============================ */
+        /* ============================
+           PATTERN UPLOAD LOGIC
+        ============================ */
 
-const patternInput = document.getElementById("patternInput");
-const patternPreviewGrid = document.getElementById("patternPreviewGrid");
-const patternPlaceholder = document.getElementById("patternPlaceholder");
-const patternAddBtn = document.getElementById("patternAddBtn");
+        const patternInput = document.getElementById("patternInput");
+        const patternPreviewGrid = document.getElementById("patternPreviewGrid");
+        const patternPlaceholder = document.getElementById("patternPlaceholder");
+        const patternAddBtn = document.getElementById("patternAddBtn");
 
-let patternFiles = [];
+        let patternFiles = [];
 
-/* Open file picker */
-patternAddBtn.addEventListener("click", function(e) {
-    e.stopPropagation();
-    patternInput.click();
-});
+        /* Open file picker */
+        patternAddBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            patternInput.click();
+        });
 
-patternPlaceholder.addEventListener("click", function() {
-    patternInput.click();
-});
+        patternPlaceholder.addEventListener("click", function () {
+            patternInput.click();
+        });
 
-/* Handle file selection */
-patternInput.addEventListener("change", function() {
-    const newFiles = Array.from(this.files);
+        /* Handle file selection */
+        patternInput.addEventListener("change", function () {
+            const newFiles = Array.from(this.files);
 
-    if (newFiles.length > 0) {
-        patternFiles = [...patternFiles, ...newFiles];
-        renderPatternPreviews();
-    }
+            if (newFiles.length > 0) {
+                patternFiles = [...patternFiles, ...newFiles];
+                renderPatternPreviews();
+            }
 
-    // reset so same file can be selected again
-    this.value = "";
-});
+            // reset so same file can be selected again
+            this.value = "";
+        });
 
-/* Render previews */
-function renderPatternPreviews() {
-    patternPreviewGrid.innerHTML = "";
-    patternPlaceholder.style.display = patternFiles.length ? "none" : "flex";
+        /* Render previews */
+        function renderPatternPreviews() {
+            patternPreviewGrid.innerHTML = "";
+            patternPlaceholder.style.display = patternFiles.length ? "none" : "flex";
 
-    patternFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const div = document.createElement("div");
-            div.className = "preview-item";
-            div.innerHTML = `
+            patternFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const div = document.createElement("div");
+                    div.className = "preview-item";
+                    div.innerHTML = `
                 <img src="${e.target.result}" alt="pattern">
                 <button class="remove-btn" type="button" data-index="${index}">×</button>
             `;
-            patternPreviewGrid.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-}
+                    patternPreviewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
 
-/* Remove pattern */
-patternPreviewGrid.addEventListener("click", function(e) {
-    const btn = e.target.closest(".remove-btn");
-    if (!btn) return;
+        /* Remove pattern */
+        patternPreviewGrid.addEventListener("click", function (e) {
+            const btn = e.target.closest(".remove-btn");
+            if (!btn) return;
 
-    const index = parseInt(btn.dataset.index);
-    if (isNaN(index)) return;
+            const index = parseInt(btn.dataset.index);
+            if (isNaN(index)) return;
 
-    patternFiles.splice(index, 1);
-    renderPatternPreviews();
-});
+            patternFiles.splice(index, 1);
+            renderPatternPreviews();
+        });
 
-function renderPreviews() {
-    previewGrid.innerHTML = "";
-    uploadPlaceholder.style.display = uploadedFiles.length ? "none" : "flex";
+        function renderPreviews() {
+            previewGrid.innerHTML = "";
+            uploadPlaceholder.style.display = uploadedFiles.length ? "none" : "flex";
 
-    // 🔹 If more than 2 images → show ONLY count
-    if (uploadedFiles.length > 2) {
-        const countBox = document.createElement("div");
+            // 🔹 If more than 2 images → show ONLY count
+            if (uploadedFiles.length > 2) {
+                const countBox = document.createElement("div");
 
-        countBox.style.background = "#111";
-        countBox.style.padding = "20px";
-        countBox.style.borderRadius = "14px";
-        countBox.style.border = "1px dashed rgba(255,255,255,0.2)";
-        countBox.style.textAlign = "center";
-        countBox.style.fontSize = "18px";
-        countBox.style.fontWeight = "600";
+                countBox.style.background = "#111";
+                countBox.style.padding = "20px";
+                countBox.style.borderRadius = "14px";
+                countBox.style.border = "1px dashed rgba(255,255,255,0.2)";
+                countBox.style.textAlign = "center";
+                countBox.style.fontSize = "18px";
+                countBox.style.fontWeight = "600";
 
-        countBox.innerHTML = `📦 ${uploadedFiles.length} Images Selected`;
+                countBox.style.position = "relative";
 
-        previewGrid.appendChild(countBox);
-        return;
-    }
+                countBox.innerHTML = `
+                    <button class="remove-btn remove-all" type="button">×</button>
+                    📦 ${uploadedFiles.length} Images Selected
+                `;
 
-    // 🔹 Otherwise show image previews (1 or 2 images)
-    uploadedFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const div = document.createElement("div");
-            div.className = "preview-item";
-            div.innerHTML = `
+                previewGrid.appendChild(countBox);
+                return;
+            }
+
+            // 🔹 Otherwise show image previews (1 or 2 images)
+            uploadedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const div = document.createElement("div");
+                    div.className = "preview-item";
+                    div.innerHTML = `
                 <img src="${e.target.result}" alt="preview">
                 <button class="remove-btn" type="button" data-index="${index}">×</button>
             `;
-            previewGrid.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-}
+                    previewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
 
-</script>
+        previewGrid.addEventListener("click", function (e) {
+    if (e.target.classList.contains("remove-all")) {
+        uploadedFiles = [];
+        renderPreviews();
+    }
+});
+
+    </script>
 
 </body>
 

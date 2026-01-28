@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import generate_page,history_page, FashionGenerateAPI, DownloadGeneratedImagesAPI, GenerationHistoryAPI
+from .views import generate_page,history_page, FashionGenerateAPI, DownloadGeneratedImagesAPI, GenerationHistoryAPI, login_view
 
 urlpatterns = [
+    path("login/", login_view, name="login"),
     path("", generate_page, name="generate-page"),
     path("history/", history_page, name="generation-history-page"),
     path("generate/", FashionGenerateAPI.as_view(), name="fashion-generate"),

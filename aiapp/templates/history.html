@@ -108,7 +108,7 @@ h1 {
 
 <header>
     <h1>✨ Fashion AI Studio</h1>
-    <a href="/api" style="color:#f5c26b;text-decoration:none;">← Back to Studio</a>
+    <a href="/api/" style="color:#f5c26b;text-decoration:none;">← Back to Studio</a>
 </header>
 
 <div class="container">
@@ -254,9 +254,15 @@ function renderPage(page) {
                 <div>🖼 ${item.generated_count} Images</div>
             </div>
 
-            <p>Gender: <b>${item.gender}</b> | Bodytype: <b>${item.bodytype}</b></p>
-            <p>Uploaded: ${item.uploaded_images.join(", ")}</p>
+            <p>
+                👤 User: <b>${item.user}</b>
+                &nbsp; | &nbsp;
+                Gender: <b>${item.gender}</b>
+                &nbsp; | &nbsp;
+                Bodytype: <b>${item.bodytype}</b>
+            </p>
 
+            <p>📤 Uploaded: ${item.uploaded_images.join(", ")}</p>
         `;
 
         historyList.appendChild(card);

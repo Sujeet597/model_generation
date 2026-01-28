@@ -7,7 +7,7 @@ from django.core.files.base import ContentFile
 import os
 from io import BytesIO
 from django.shortcuts import render
-from .models import GeminiGenerationStats
+# from .models import GeminiGenerationStats
 import os
 import zipfile
 from django.http import HttpResponse
@@ -19,22 +19,58 @@ from datetime import datetime, date
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 import time
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
+from datetime import datetime, date
+from decimal import Decimal
+from django.db.models import Sum
+
+from .models import ImageGenerationSummary, ImageGenerationHistory
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-##### ----------------------START render page CBF -------------------------------####
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("/api/")
 
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("/api/")
+        else:
+            messages.error(request, "Invalid username or password")
+
+    return render(request, "login.html")
+
+
+##### ----------------------START render page CBF -------------------------------####
+@login_required(login_url="/login/")
 def generate_page(request):
     return render(request, "generate.html")
-
+@login_required(login_url="/login/")
 def history_page(request):
-    return render(request, "history.html")
+    if request.user.is_superuser:
+        return render(request, "history.html")
+
+    return redirect("/api/", message="You are not authorized to view this page")
 
 ##### ----------------------END render page CBF -------------------------------####
 
 ### -------------------------START DRF API view ------------------------------#####
 
 class DownloadGeneratedImagesAPI(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         date_folder = request.GET.get("date")   # e.g. 2026-01-19
@@ -76,34 +112,50 @@ class DownloadGeneratedImagesAPI(APIView):
 
         return response
 
-
-
 class GenerationHistoryAPI(APIView):
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
-        json_dir = os.path.join(settings.MEDIA_ROOT, "json")
-        stats_file = os.path.join(json_dir, "stats.json")
+        # 🔹 Aggregate totals (across all users)
+        totals = ImageGenerationSummary.objects.aggregate(
+            total_images=Sum("total_images"),
+            total_cost=Sum("total_cost")
+        )
 
-        if not os.path.exists(stats_file):
-            return Response({
-                "status": "success",
-                "total_images": 0,
-                "total_cost": 0,
-                "history": []
+        total_images = totals["total_images"] or 0
+        total_cost = totals["total_cost"] or 0
+
+        # 🔹 Fetch history (latest first)
+        histories = ImageGenerationHistory.objects.select_related(
+            "summary", "summary__user"
+        ).order_by("-created_at")
+
+        history_data = []
+        for h in histories:
+            history_data.append({
+                "timestamp": h.timestamp,
+                "user": h.summary.user.username,
+                "gender": h.gender,
+                "bodytype": h.bodytype,
+                "uploaded_images": h.uploaded_images,
+                "generated_images": h.generated_images,
+                "generated_count": h.generated_count,
+                "cost_per_image": float(h.cost_per_image),
+                "total_images": h.total_images,
+                "total_cost": float(h.total_cost),
+                "created_at": h.created_at,
             })
-
-        with open(stats_file, "r") as f:
-            stats = json.load(f)
 
         return Response({
             "status": "success",
-            "total_images": stats.get("total_images", 0),
-            "total_cost": stats.get("total_cost", 0),
-            "history": stats.get("history", [])
+            "total_images": total_images,
+            "total_cost": float(total_cost),
+            "history": history_data
         })
-    
+
 
 class FashionGenerateAPI(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         gender = request.data.get("gender")
@@ -189,59 +241,92 @@ class FashionGenerateAPI(APIView):
         # Async JSON write
         stats_file = os.path.join(json_dir, "stats.json")
 
-        COST_PER_IMAGE = 0.04
+        # COST_PER_IMAGE = 0.04
+        # new_images = len(output_urls)
+        COST_PER_IMAGE = Decimal("0.04")
         new_images = len(output_urls)
+        new_cost = new_images * COST_PER_IMAGE
 
-        # Load existing stats or create new
-        if os.path.exists(stats_file):
-            with open(stats_file, "r") as f:
-                stats = json.load(f)
-        else:
-            stats = {
+        # # Load existing stats or create new
+        # if os.path.exists(stats_file):
+        #     with open(stats_file, "r") as f:
+        #         stats = json.load(f)
+        # else:
+        #     stats = {
+        #         "total_images": 0,
+        #         "total_cost": 0.0,
+        #         "history": []
+        #     }
+
+        # # Update stats
+        # stats["total_images"] += new_images
+        # stats["total_cost"] = round(stats["total_images"] * COST_PER_IMAGE, 2)
+
+        # # Create per-request log
+        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # log_data = {
+        #     "timestamp": timestamp,
+        #     "gender": gender,
+        #     "bodytype": bodytype,
+        #     "uploaded_images": uploaded_names,
+        #     "generated_images": generated_names,
+        #     "generated_count": new_images,
+        #     "cost_per_image": COST_PER_IMAGE,
+        #     "total_images": stats["total_images"],
+        #     "total_cost": stats["total_cost"]
+        # }
+
+        # # Save per-request JSON
+        # log_filename = f"generation_{timestamp}.json"
+        # log_path = os.path.join(json_dir, log_filename)
+
+        # with open(log_path, "w") as f:
+        #     json.dump(log_data, f, indent=4)
+
+        # # Append history
+        # stats["history"].append(log_data)
+
+        # # Save global stats
+        # with open(stats_file, "w") as f:
+        #     json.dump(stats, f, indent=4)
+        summary, created = ImageGenerationSummary.objects.get_or_create(
+            user=request.user,
+            defaults={
                 "total_images": 0,
-                "total_cost": 0.0,
-                "history": []
+                "total_cost": Decimal("0.00")
             }
+        )
 
-        # Update stats
-        stats["total_images"] += new_images
-        stats["total_cost"] = round(stats["total_images"] * COST_PER_IMAGE, 2)
+        # Update totals
+        summary.total_images += new_images
+        summary.total_cost += new_cost
+        summary.save()
 
-        # Create per-request log
+        # -----------------------------
+        # 🧾 CREATE HISTORY ENTRY
+        # -----------------------------
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_data = {
-            "timestamp": timestamp,
-            "gender": gender,
-            "bodytype": bodytype,
-            "uploaded_images": uploaded_names,
-            "generated_images": generated_names,
-            "generated_count": new_images,
-            "cost_per_image": COST_PER_IMAGE,
-            "total_images": stats["total_images"],
-            "total_cost": stats["total_cost"]
-        }
 
-        # Save per-request JSON
-        log_filename = f"generation_{timestamp}.json"
-        log_path = os.path.join(json_dir, log_filename)
-
-        with open(log_path, "w") as f:
-            json.dump(log_data, f, indent=4)
-
-        # Append history
-        stats["history"].append(log_data)
-
-        # Save global stats
-        with open(stats_file, "w") as f:
-            json.dump(stats, f, indent=4)
+        ImageGenerationHistory.objects.create(
+            summary=summary,
+            timestamp=timestamp,
+            gender=gender,
+            bodytype=bodytype,
+            uploaded_images=uploaded_names,
+            generated_images=generated_names,
+            generated_count=new_images,
+            cost_per_image=COST_PER_IMAGE,
+            total_images=summary.total_images,
+            total_cost=summary.total_cost
+        )
 
 
         return Response({
             "status": "success",
             "count": new_images,
             "results": output_urls,
-            "total_images": stats["total_images"],
-            "total_cost": stats["total_cost"],
+            "total_images": summary.total_images,
+            "total_cost": float(summary.total_cost),
             "date_folder": today_str,
             "hit_folder": next_index 
         })
