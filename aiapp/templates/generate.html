@@ -106,7 +106,8 @@
     justify-content: center;
 } */
         .upload-box1,
-        .upload-box2 {
+        .upload-box2,
+        .upload-box3 {
             font-family: 'Playfair Display', serif;
             border: 2px dashed rgba(255, 255, 255, 0.15);
             padding: 40px 30px;
@@ -210,6 +211,20 @@
             font-family: 'Playfair Display', serif;
             margin-bottom: 10px;
         }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .special_instructions{
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: #111;
+            color: white;
+            font-size: 16px;
+        }
 
 
         /* SELECT */
@@ -255,7 +270,7 @@
             align-items: flex-start;
             gap: 30px;
             margin-bottom: 40px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         /* GALLERY */
@@ -272,68 +287,68 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         /* Toast Container */
-#toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-/* Toast */
-.toast {
-    min-width: 260px;
-    max-width: 340px;
-    padding: 14px 18px;
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 500;
-    backdrop-filter: blur(10px);
-    animation: slideIn 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.45);
-}
+        /* Toast */
+        .toast {
+            min-width: 260px;
+            max-width: 340px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.45);
+        }
 
-/* Success */
-.toast.success {
-    background: rgba(46, 204, 113, 0.18);
-    border: 1px solid rgba(46, 204, 113, 0.45);
-    color: #a8f0c6;
-}
+        /* Success */
+        .toast.success {
+            background: rgba(46, 204, 113, 0.18);
+            border: 1px solid rgba(46, 204, 113, 0.45);
+            color: #a8f0c6;
+        }
 
-/* Error */
-.toast.error {
-    background: rgba(231, 76, 60, 0.18);
-    border: 1px solid rgba(231, 76, 60, 0.45);
-    color: #ffb3b3;
-}
+        /* Error */
+        .toast.error {
+            background: rgba(231, 76, 60, 0.18);
+            border: 1px solid rgba(231, 76, 60, 0.45);
+            color: #ffb3b3;
+        }
 
-/* Warning */
-.toast.warning {
-    background: rgba(241, 196, 15, 0.18);
-    border: 1px solid rgba(241, 196, 15, 0.45);
-    color: #ffeaa7;
-}
+        /* Warning */
+        .toast.warning {
+            background: rgba(241, 196, 15, 0.18);
+            border: 1px solid rgba(241, 196, 15, 0.45);
+            color: #ffeaa7;
+        }
 
-/* Animations */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-}
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
 
 
         /* MOBILE */
@@ -445,6 +460,20 @@
 
 
                 </div>
+                <div class="upload-box3" id="broachUploadBox">
+
+                    <input type="file" id="broachInput" hidden>
+
+                    <div class="upload-placeholder" id="broachPlaceholder">
+                        <div class="upload-icon">💎</div>
+                        <h3>Upload Broach / Accessory (Optional)</h3>
+                        <p>PNG, JPG • Broach, accessory, jewelry</p>
+                        <button id="broachAddBtn" class="add-btn" type="button">+ Add Broach</button>
+                    </div>
+
+                    <div class="preview-grid" id="broachPreviewGrid"></div>
+
+                </div>
 
             </div>
 
@@ -452,6 +481,9 @@
 
 
             <div class="row">
+                <label for="special_instructions">Special Instructions (Optional):</label>
+                <textarea id="special_instructions" rows="3" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:#111; color:white; font-size:16px;"
+                    placeholder="E.g., 'Outdoor shoot with natural lighting', 'Urban background', 'High fashion editorial style'"></textarea>
                 <select id="gender">
                     <option value="Male">Male Model</option>
                     <option value="Female">Female Model</option>
@@ -471,6 +503,14 @@
                     <option value="1">1</option>
                     <option value="4">4</option>
                 </select>
+                <select id="broach_placement">
+                    <option value="None">No Accessory</option>
+                    <option value="Upper Left Chest (Below Collarbone)">Upper Left Chest (Below Collarbone)</option>
+                    <option value="Center Chest">Center Chest</option>
+                    <option value="Collar">Collar</option>
+                    <option value="Left Shoulder">Left Shoulder</option>
+                </select>
+
             </div>
 
             <button type="submit">✨ Generate Fashion Shoot</button>
@@ -619,6 +659,12 @@
             formData.append("bodytype", document.getElementById("bodytype").value);
             formData.append("model", document.getElementById("model").value);
             formData.append("imagesCount", document.getElementById("imagesCount").value);
+            formData.append("special_instructions", document.getElementById("special_instructions")?.value || "");
+            broachFiles.forEach(file => {
+                formData.append("broach", file);   // Django will receive request.FILES.getlist("broach")
+            });
+            formData.append("broach_placement", document.getElementById("broach_placement").value);
+            console.log("Form Data Prepared:", document.getElementById("broach_placement").value);
 
             try {
                 const response = await fetch("/api/generate/", {
@@ -631,6 +677,7 @@
 
 
                 const data = await response.json();
+                console.log("Response data:", data);
 
                 if (data.status === "success") {
                     status.innerHTML = `✅ Generated ${data.count} images`;
@@ -775,6 +822,52 @@
         renderPreviews();
     }
 });
+        const broachInput = document.getElementById("broachInput");
+        const broachPreviewGrid = document.getElementById("broachPreviewGrid");
+        const broachPlaceholder = document.getElementById("broachPlaceholder");
+        const broachAddBtn = document.getElementById("broachAddBtn");
+        let broachFiles = [];
+        broachAddBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            broachInput.click();
+        });
+        broachPlaceholder.addEventListener("click", function () {
+            broachInput.click();
+        });
+        broachInput.addEventListener("change", function () {
+            const newFiles = Array.from(this.files);
+            if (newFiles.length > 0) {
+                broachFiles = [...broachFiles, ...newFiles];
+                renderBroachPreviews();
+            }
+            this.value = "";
+        });
+        function renderBroachPreviews() {
+            broachPreviewGrid.innerHTML = "";
+            broachPlaceholder.style.display = broachFiles.length ? "none" : "flex";
+            broachFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const div = document.createElement("div");
+                    div.className = "preview-item";
+                    div.innerHTML = `
+                <img src="${e.target.result}" alt="broach">
+                <button class="remove-btn" type="button" data-index="${index}">×</button>
+            `;
+                    broachPreviewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        broachPreviewGrid.addEventListener("click", function (e) {
+            const btn = e.target.closest(".remove-btn");
+            if (!btn) return;
+            const index = parseInt(btn.dataset.index);
+            if (isNaN(index)) return;
+            broachFiles.splice(index, 1);
+            renderBroachPreviews();
+        });
+
 
     </script>
 

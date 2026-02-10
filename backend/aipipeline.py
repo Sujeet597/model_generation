@@ -18,12 +18,15 @@ load_dotenv()
 # Initialize the 2025 Client
 client = genai.Client(api_key=os.getenv("GEMINIAPI_KEY"))
 
-def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patternfile=None, color_name=None, view_direction="front"):
+def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patternfile=None, accessory=None, broach_placement=None, special_instructions=None, color_name=None, view_direction="front"):
     try:
         img = Image.open(shirtfile)
         img.load()
         shirtfile.seek(0)
         processed_shirt = prepareimage(shirtfile)
+        processed_broach = None
+        processed_pattern = None
+
         
         # CRITICAL: Place color lock at the very start
         color_lock_instruction = (
@@ -35,6 +38,8 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patter
         
         if patternfile:
             processed_pattern = prepareimage(patternfile)
+        if accessory:
+            processed_accessory = prepareimage(accessory)
 
             prompt_text = buildprompt(
                 'texture overlay',
@@ -43,7 +48,9 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patter
                 model,
                 image_count,
                 color_name=color_name,
-                view_direction=view_direction
+                view_direction=view_direction,
+                broach_placement=broach_placement,
+                special_instructions=special_instructions
             )
 
             contents = safe_contents(
@@ -51,6 +58,7 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patter
                 "Apply the pattern to the garment.",
                 processed_shirt,
                 processed_pattern,
+                processed_accessory,
                 prompt_text
             )
 
@@ -63,13 +71,16 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patter
                 model,
                 image_count,
                 color_name=color_name,
-                view_direction=view_direction
+                view_direction=view_direction,
+                broach_placement=broach_placement,
+                special_instructions=special_instructions
             )
 
             contents = safe_contents(
                 color_lock_instruction,
                 "Render the garment on a professional fashion model.",
                 processed_shirt,
+                processed_accessory,
                 prompt_text
             )
 
@@ -136,22 +147,25 @@ def run_singlegeneration(shirtfile, gender, bodytype, model, image_count, patter
 #     return all_results
 
 
+from google.genai import types
+
 def safe_contents(*items):
     cleaned = []
     for item in items:
         if item is None:
             continue
-        if isinstance(item, (str, Image.Image)):
+        if isinstance(item, (str, Image.Image, types.Part)):
             cleaned.append(item)
         else:
             raise ValueError(f"Invalid content type: {type(item)}")
     return cleaned
 
+
 MAX_WORKERS = min(8, os.cpu_count() or 4)
 MAX_RETRIES = 2
 
 
-def runbatch_pipeline(uploaded_files, gender, bodytype, model, image_count, pattern_file=None, color_name=None, generate_all_views=True):
+def runbatch_pipeline(uploaded_files, gender, bodytype, model, image_count, pattern_file=None, accessory=None, broach_placement=None, special_instructions=None, color_name=None, generate_all_views=True):
     all_results = []
     if image_count == "1":
         views = ["front"]
@@ -173,7 +187,7 @@ def runbatch_pipeline(uploaded_files, gender, bodytype, model, image_count, patt
     def safe_generate(file, view):
         for attempt in range(MAX_RETRIES):
             try:
-                return run_singlegeneration(file, gender, bodytype,model,image_count, pattern_file, color_name, view)
+                return run_singlegeneration(file, gender, bodytype,model,image_count, pattern_file,accessory, broach_placement, special_instructions, color_name, view)
             except Exception as e:
                 if attempt == MAX_RETRIES - 1:
                     raise e

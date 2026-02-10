@@ -163,8 +163,11 @@ class FashionGenerateAPI(APIView):
         pattern = request.FILES.get("pattern")
         files = request.FILES.getlist("designs")
         model = request.FILES.getlist("model")
+        accessory = request.FILES.get("broach")
+        broach_placement = request.data.get("broach_placement", "None")
         images_count = request.data.get("imagesCount", 1)
-        print("Received imagesCount:", images_count)
+        special_instructions = request.data.get("special_instructions", "")
+
 
         today_str = date.today().strftime("%Y-%m-%d")
         generated_dir = os.path.join(settings.MEDIA_ROOT, "generated", today_str)
@@ -203,7 +206,7 @@ class FashionGenerateAPI(APIView):
         # Run AI in background thread
         with ThreadPoolExecutor() as executor:
             results = executor.submit(
-                runbatch_pipeline, files, gender, bodytype, model, images_count, pattern
+                runbatch_pipeline, files, gender, bodytype, model, images_count, pattern, accessory, broach_placement, special_instructions
             ).result()
         ai_time = round(time.time() - ai_start, 2)
 

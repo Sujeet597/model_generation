@@ -1,4 +1,4 @@
-def buildprompt(condition, gender, bodytype, model, image_count, pattern_name='none', color_name=None, view_direction="front"):
+def buildprompt(condition, gender, bodytype, model, image_count, pattern_name='none',  broach_placement=None, special_instructions=None, color_name=None, view_direction="front"):
     
     # MODEL DESCRIPTION
     print(image_count)
@@ -40,6 +40,7 @@ def buildprompt(condition, gender, bodytype, model, image_count, pattern_name='n
             "front": "Front-facing model pose showing the front of the garment clearly."
         }
         print("Single image requested, using front view only.")
+    
     else:
         view_map = {
             "front": "Front-facing model pose showing the front of the garment clearly.",
@@ -49,6 +50,14 @@ def buildprompt(condition, gender, bodytype, model, image_count, pattern_name='n
         }
         print("Multiple images requested, using all views.")
     view_instr = view_map.get(view_direction.lower(), "Front-facing fashion model pose.")
+    if broach_placement:
+        view_instr += f" The broach should be prominently displayed on the {broach_placement} of the garment."
+    else:
+        view_instr += " No broach is to be included in the image."
+    if special_instructions:
+        view_instr += f" Additional instructions: {special_instructions}"
+    else:
+        view_instr += " No additional special instructions."
 
     # AUTO BACKGROUND SELECTION (AI decides based on garment)
     background_instr = """
@@ -84,45 +93,79 @@ def buildprompt(condition, gender, bodytype, model, image_count, pattern_name='n
     prompt = f"""
     You are a world-class fashion photographer and AI fashion director.
 
-    Your task:
-    1. Analyze the SOURCE_IMAGE garment carefully.
-    2. Understand the clothing type, season, and style.
-    3. Select the best outdoor lifestyle fashion photoshoot environment.
-    4. Generate a hyper-realistic fashion model photoshoot.
+    PRIMARY OBJECTIVE:
+    Generate a hyper-realistic fashion photoshoot image by strictly preserving
+    the garment from the SOURCE_IMAGE.
 
-    Model:
-    - model-type{model}
-    - {model_desc}
-    - Confident neutral expression
-    - Professional fashion pose
+    STEP-BY-STEP TASK:
+    1. Carefully analyze the SOURCE_IMAGE garment.
+    2. Identify exact clothing type, fit, fabric, pattern, and construction.
+    3. Select a realistic outdoor lifestyle fashion environment that MATCHES the garment season and style.
+    4. Generate a professional e-commerce fashion photoshoot.
 
-    Size:
-    -(2000x3000)px
+    IMPORTANT CONDITIONS:
+    - Special instruction: {special_instructions or "None"}
+    PRODUCT TAG / BROOCH INSTRUCTIONS (STRICT):
+        - Type: { "Product tag" or "Brooch" }
+        - Visibility: Clearly visible but non-distracting
+        - Placement: {broach_placement or "N/A"}
+        - Attachment method:
+        - Product tag: Thin string / safety pin / fabric loop
+        - Brooch: Properly pinned, flat against fabric
+        - Size: Small, proportional to garment
+        - Color: Neutral (white / beige / metallic) unless specified
+        - Must look physically attached (not floating)
+        - Must NOT alter garment shape, fit, or drape
+        - No additional accessories allowed
 
-    Framing:
-    - {framing_desc}
-    - {view_instr}
 
-    Lighting:
+    MODEL DETAILS (STRICT):
+    - Model type: {model}
+    - Description: {model_desc}
+    - Expression: Neutral, confident
+    - Pose: Professional fashion pose
+    - Body posture must not distort garment fit
+
+    IMAGE SIZE (STRICT — DO NOT CHANGE):
+    - Final output size: 2:3 aspect ratio
+    - Aspect ratio: Preserved 
+    - Garment: Rendered at natural size and proportions (no upscaling/downscaling)
+    - If needed, add clean padding/negative space to fit the canvas
+    - Center the model/garment on the canvas
+    - Any source ratio is fine, but final canvas will be exactly 2:3 ratio with the garment properly scaled and centered
+
+    FRAMING & CAMERA:
+    - Framing: {framing_desc}
+    - View: {view_instr}
+    - Full garment must be visible (no cropping unless specified)
+
+    LIGHTING:
     - Natural outdoor lighting
-    - Cinematic fashion photography
-    - Realistic fabric folds and shadows
+    - Soft cinematic fashion light
+    - Accurate fabric shadows and folds
+    - No harsh highlights or artificial glow
 
-    Background (AUTO-SELECTED BY AI):
-    {background_instr}
+    BACKGROUND (AI-SELECTED BUT CONTROLLED):
+    - {background_instr}
+    - Background must NOT distract from garment
+    - Depth of field must keep garment sharp
 
-    Garment Rules (STRICT):
-    - {color_instr}
-    - Preserve original pattern and fabric texture
-    - No creative changes to garment
+    GARMENT PRESERVATION RULES (ABSOLUTE):
+    - Color: {color_instr}
+    - Fabric texture must remain unchanged
+    - Pattern must remain identical
+    - Stitching, cut-outs, brooch, and design details must match SOURCE_IMAGE
+    - NO redesign, NO styling alteration, NO added accessories
 
-    Quality:
-    - Ultra HD fashion photography
-    - Marketplace catalog style (Myntra / Ajio / Zara)
-    - Sharp focus, realistic rendering
+    QUALITY STANDARD:
+    - Ultra-HD realism
+    - Marketplace catalog quality (Myntra / Ajio / Zara)
+    - Clean, sharp, commercial-ready output
 
-    Output:
-    - Professional fashion product image ready for e-commerce
+    FINAL OUTPUT:
+    - One professional fashion product image
+    - Ready for e-commerce listing
     """
+
 
     return prompt
